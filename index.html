@@ -1,0 +1,93 @@
+<html>
+  <head>
+    <title>Embedding Vega-Lite</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.5.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.21.0"></script>
+  </head>
+  <body>
+    <p>Hypothesis: For the top 1000 streamers on livestreaming platform twitch.tv, ranked by watch time, throughout the year 2019, followers gained and minutes of viewership will be positively correlated to minutes livestreamed.</p>
+    <div id="line"></div>
+    <div id="hist"></div>
+    <p>Conclusion: There is no correlation between time streamed and time watched among the top 1000 streamers on twitch.tv. There also appears to be a higher density of average followers gained for streamers below 200,000 minutes per year, suggesting a negative correlation between time streamed and followers gained.</p>
+    <p>
+      Data source: <a href=https://www.kaggle.com/datasets/aayushmishra1512/twitchdata>https://www.kaggle.com/datasets/aayushmishra1512/twitchdata</a>
+    </p>
+
+
+
+
+    <script type="text/javascript">
+    var scatSpec = {
+      "title": {
+      "text": "Watch time (in minutes) in relation to time streaming (in minutes), 2019-2020",
+      "anchor": "start"
+      },
+      "width":500,
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      data: {"url": "twitchdata-update.csv"},
+      "layer": [
+        {mark: {
+        type: 'point',
+        filled: true,
+      },
+      encoding: {
+        "x": {field: 'Stream time(minutes)', type: 'quantitative', sort: 'scending',},
+        "y": {field: 'Watch time(Minutes)', type: 'quantitative',},
+      }},
+      {
+      mark:{
+        type:'line',
+        color:"red",
+      },
+      "transform": [{"regression": 'Watch time(Minutes)', "on": "Stream time(minutes)"}],
+      encoding: {
+        "x": {field: 'Stream time(minutes)', type: 'quantitative'},
+        "y": {field: 'Watch time(Minutes)', type: 'quantitative'},
+      }
+    },
+    {
+      "transform": [
+        {
+          "regression": 'Watch time(Minutes)',
+          "on": "Stream time(minutes)",
+          "params": true
+        },
+        {"calculate": "'R²: '+format(datum.rSquared, '.2f')", "as": "R2"}
+      ],
+      "mark": {
+        "type": "text",
+        "color": "red",
+        "x": "width",
+        "align": "right",
+        "y": -5
+      },
+      "encoding": {
+        "text": {"type": "nominal", "field": "R2"}
+      }
+    }
+    ]
+        
+      };
+      vegaEmbed('#line', scatSpec);
+
+    var histSpec = {
+      "title": {
+        "text": "Average followers gained in relation to time streaming (in minutes) for the top 1000 Twitch streamers, 2019-2020",
+        "anchor": "start"
+      },
+      "width": 300,
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      data: {"url": "twitchdata-update.csv"},
+      mark: {
+        type: 'bar',
+      },
+      encoding: {
+        "x": {field: 'Stream time(minutes)', type: 'quantitative', sort: 'scending',},
+        "y": {field: 'Followers gained', type: 'quantitative',"aggregate":"mean"},
+      }
+    };
+    vegaEmbed('#hist', histSpec);
+    </script>
+  </body>
+</html>
